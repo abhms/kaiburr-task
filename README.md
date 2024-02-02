@@ -13,7 +13,7 @@ To get started with the project, follow the steps below:
 Clone the repository to your local machine using the following command:
 
 ```bash
-git clone https://github.com/your-username/kiaburr-data-visualization.git
+git clone https://github.com/abhms/kaiburr-task.git
 
 ```
 
