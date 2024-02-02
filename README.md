@@ -26,5 +26,5 @@ npm install
 Command for run Project : 
 
 ```
-npm started
+npm start
 ```
