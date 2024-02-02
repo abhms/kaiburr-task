@@ -59,9 +59,9 @@ const App = () => {
 
   return (
     <div className='App'>
+          <h4>Data from {skip} items-{skip + 10} items</h4>
       <table>
         <thead>
-          <h4>Data from {skip} items-{skip + 10} items</h4>
           <tr>
             <th>Checkbox</th>
             <th>Title</th>
