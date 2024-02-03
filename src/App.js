@@ -7,17 +7,17 @@ const App = () => {
   const [data, setData] = useState([]);
   const [skip, setSkip] = useState(0);
   const [checkedRows, setCheckedRows] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchData();
-  }, [skip]);
+  }, [skip, searchTerm]);
 
   const fetchData = async () => {
     try {
       const response = await axios.get(`https://dummyjson.com/products?limit=10&skip=${skip}&select=title,price,brand,category,stock,rating`);
       setData(response.data.products);
 
-      // Initialize checkedRows with the first 5 indices
       setCheckedRows(Array.from({ length: Math.min(5, response.data.products.length) }, (_, index) => index));
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -33,10 +33,12 @@ const App = () => {
   };
 
   const createChartData = () => {
-    const chartData = data.reduce((result, row, index) => {
+    const chartData = filteredData.reduce((result, row, index) => {
       if (checkedRows.includes(index)) {
-        const existingBrandIndex = result.findIndex((item) => item.name === row.brand);
-
+        const existingBrandIndex = result.findIndex(
+          (item) => item.name === row.brand
+        );
+  
         if (existingBrandIndex !== -1) {
           result[existingBrandIndex].x.push(row.title);
           result[existingBrandIndex].y.push(row.price);
@@ -49,17 +51,41 @@ const App = () => {
           });
         }
       }
-
+  
       return result;
-    }, [data]);
-
-    console.log(chartData, "Datatat");
+    }, []);
+  
+    console.log(chartData, 'Datatat');
     return chartData;
   };
 
+  const rowMatchesSearch = (row, term) => {
+    return (
+      Object.values(row).some(
+        (value) =>
+          typeof value === 'string' &&
+          value.toLowerCase().includes(term.toLowerCase())
+      ) ||
+      row.price.toString().includes(term) ||
+      row.brand.toLowerCase().includes(term.toLowerCase()) ||
+      row.rating.toString().includes(term) ||
+      row.stock.toString().includes(term)
+    );
+  };
+
+  const filteredData = data.filter((row) => rowMatchesSearch(row, searchTerm));
+
   return (
     <div className='App'>
-          <h4>Data from {skip} items-{skip + 10} items</h4>
+      <h4>Data from {skip} items-{skip + 10} items</h4>
+      <div className='input-container'>
+        <input
+          type='text'
+          placeholder='Search by title, brand, etc.'
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       <table>
         <thead>
           <tr>
@@ -73,12 +99,12 @@ const App = () => {
           </tr>
         </thead>
         <tbody>
-          {data &&
-            data.map((row, index) => (
+          {filteredData &&
+            filteredData.map((row, index) => (
               <tr key={index}>
                 <td>
                   <input
-                    type="checkbox"
+                    type='checkbox'
                     checked={checkedRows.includes(index)}
                     onChange={() => handleCheckboxChange(index)}
                   />
@@ -93,11 +119,19 @@ const App = () => {
             ))}
         </tbody>
       </table>
-      <div className="button-container">
-        <button onClick={() => setSkip(Math.max(0, skip - 10))} disabled={skip === 0} className="btn">
+      <div className='button-container'>
+        <button
+          onClick={() => setSkip(Math.max(0, skip - 10))}
+          disabled={skip === 0}
+          className='btn'
+        >
           Previous
         </button>
-        <button onClick={() => setSkip(skip + 10)} disabled={skip === 90} className="btn">
+        <button
+          onClick={() => setSkip(skip + 10)}
+          disabled={skip === 90}
+          className='btn'
+        >
           Next
         </button>
       </div>
